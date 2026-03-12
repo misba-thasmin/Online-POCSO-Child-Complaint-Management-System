@@ -183,7 +183,7 @@ const UserProfile = () => {
 
                     {/* Action Footer */}
                     <div className="card-footer bg-transparent border-0 px-4 px-md-5 pb-5 pt-0 text-center">
-                      <button className="portal-btn btn-primary-glass" onClick={() => EditProfile(user.id)} style={{ width: '100%', padding: '12px' }}>
+                      <button className="portal-btn btn-primary-glass" onClick={() => EditProfile(user._id)} style={{ width: '100%', padding: '12px' }}>
                         <i className="fa fa-pencil me-2"></i> Edit Profile
                       </button>
                     </div>

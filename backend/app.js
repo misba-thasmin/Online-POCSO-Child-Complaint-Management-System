@@ -62,6 +62,7 @@ const aiRoutes = require('./routes/ai');
 const locationRoutes = require('./routes/location');
 const advocateRoutes = require('./routes/advocate');
 const businesssRoutes = require('./routes/business');
+const authRoutes = require('./routes/auth');
 
 
 
@@ -81,6 +82,7 @@ app.use(`${api}/officer`, officerRoutes);
 app.use(`${api}/complaint`, complaintRoutes);
 app.use(`${api}/ai`, aiRoutes);
 app.use(`${api}/location`, locationRoutes);
+app.use(`/api/auth`, authRoutes);
 
 
 app.use('/public', express.static(path.join(__dirname, 'public')));

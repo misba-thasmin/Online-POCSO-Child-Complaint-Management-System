@@ -18,6 +18,55 @@ const ViewComplaintOfficer = () => {
   const [complaintData, setComplaintData] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const [currentOfficer, setCurrentOfficer] = useState(null);
+
+  // Read officer details
+  const officeremail = document.cookie.replace(/(?:(?:^|.*;\s*)officeremail\s*\=\s*([^;]*).*$)|^.*$/, '$1');
+
+  useEffect(() => {
+    const fetchOfficerData = async () => {
+      try {
+        const response = await axios.get(`http://localhost:4000/api/v1/officer/`);
+        if (response.status === 200 && officeremail) {
+          const matchedOfficer = response.data.find(o => o.email === decodeURIComponent(officeremail));
+          if (matchedOfficer) {
+            setCurrentOfficer(matchedOfficer);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching officer data:', error);
+      }
+    };
+    fetchOfficerData();
+  }, [officeremail]);
+
+  const assignComplaint = async (complaintId) => {
+    if (!currentOfficer) {
+      alert("Officer details not loaded. Please wait a moment and try again.");
+      return;
+    }
+    
+    try {
+      const response = await axios.put(`http://localhost:4000/api/v1/complaint/assign/${complaintId}`, {
+        officerId: currentOfficer._id || currentOfficer.id,
+        officerName: currentOfficer.name
+      }, {
+        headers: {
+          'x-auth-token': localStorage.getItem('token')
+        }
+      });
+      
+      if (response.data.success) {
+        alert("Case assigned successfully!");
+        setComplaintData(prevData => prevData.map(c => 
+          c._id === complaintId ? response.data.complaint : c
+        ));
+      }
+    } catch (error) {
+       console.error("Assignment error:", error);
+       alert(error.response?.data?.message || "Error assigning case");
+    }
+  };
 
   // Apply Light Theme Background
   useEffect(() => {
@@ -51,17 +100,34 @@ const ViewComplaintOfficer = () => {
     fetchComplaintData();
   }, []);
 
-  // Read officerDepartment and officerLocation from cookies
-  const officerLocation = document.cookie.replace(/(?:(?:^|.*;\s*)officerLocation\s*\=\s*([^;]*).*$)|^.*$/, '$1');
-
-  // Filter data based on officerLocation and search term
+  // Filter data to show complaints assigned to the officer OR matching their location/district
   const filteredData = complaintData.filter((complaint) => {
-    const isLocationMatch = officerLocation ? complaint.location.toLowerCase().includes(officerLocation.toLowerCase()) : true;
+    if (!currentOfficer) return false;
+
+    const officerLoc = (currentOfficer.location || '').toLowerCase().trim();
+    const officerDist = (currentOfficer.district || '').toLowerCase().trim();
+    const officerCity = (currentOfficer.city || '').toLowerCase().trim();
+
+    const compDist = (complaint.district || '').toLowerCase().trim();
+    const compLoc = (complaint.location || '').toLowerCase().trim();
+
+    // Check if location matches
+    const isLocationMatch = 
+      (officerLoc && (compDist === officerLoc || compLoc === officerLoc)) ||
+      (officerDist && (compDist === officerDist || compLoc === officerDist)) ||
+      (officerCity && (compDist === officerCity || compLoc === officerCity));
+
+    // Also include if explicitly assigned to this officer
+    const isAssignedToCurrentOfficer = complaint.assignedOfficerId === (currentOfficer._id || currentOfficer.id);
+    
+    // If it doesn't match location and isn't assigned to them, hide it
+    if (!isLocationMatch && !isAssignedToCurrentOfficer) return false;
+
     const isSearchTermMatch = Object.values(complaint).some((field) =>
       field && field.toString().toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    return isLocationMatch && isSearchTermMatch;
+    return isSearchTermMatch;
   });
 
   if (loading) {
@@ -243,9 +309,22 @@ const ViewComplaintOfficer = () => {
 
                     {/* Officer Actions Footer */}
                     <div className="card-footer bg-transparent border-0 px-4 pb-4 pt-0">
-                      <div className="d-flex flex-wrap gap-2 pt-3" style={{ borderTop: '1px solid #f1f5f9' }}>
-                        <button className="btn btn-sm btn-outline-primary" onClick={() => UpdateStatusAdmin(complaint.id)} style={{ borderRadius: '8px' }}><i className="fa fa-pencil-square-o me-1"></i> Update Status</button>
-                        <a className="btn btn-sm btn-outline-info" target="_blank" rel="noopener noreferrer" href={`https://maps.google.com/?q=${complaint.lat},${complaint.long}`} style={{ borderRadius: '8px' }}><i className="fa fa-map me-1"></i> Show Map</a>
+                      <div className="d-flex flex-wrap gap-2 align-items-center pt-3" style={{ borderTop: '1px solid #f1f5f9' }}>
+                        
+                        {!complaint.assignedOfficerId ? (
+                            <button className="btn btn-sm btn-primary py-2 px-3 fw-bold" onClick={() => assignComplaint(complaint._id)} style={{ borderRadius: '8px' }}>
+                                <i className="fa fa-briefcase me-1"></i> Work on Case
+                            </button>
+                        ) : complaint.assignedOfficerId === (currentOfficer?._id || currentOfficer?.id) ? (
+                            <>
+                                <span className="badge bg-success px-3 py-2" style={{ borderRadius: '8px', fontSize: '13px' }}><i className="fa fa-check-circle me-1"></i> Assigned to You</span>
+                                <button className="btn btn-sm btn-outline-primary" onClick={() => UpdateStatusAdmin(complaint._id)} style={{ borderRadius: '8px' }}><i className="fa fa-pencil-square-o me-1"></i> Update Status</button>
+                            </>
+                        ) : (
+                            <span className="badge bg-secondary px-3 py-2 text-white" style={{ borderRadius: '8px', fontSize: '13px' }}><i className="fa fa-lock me-1"></i> Assigned to: {complaint.assignedOfficerName}</span>
+                        )}
+
+                        <a className="btn btn-sm btn-outline-info ms-auto" target="_blank" rel="noopener noreferrer" href={`https://maps.google.com/?q=${complaint.lat},${complaint.long}`} style={{ borderRadius: '8px' }}><i className="fa fa-map me-1"></i> Show Map</a>
                       </div>
                     </div>
 

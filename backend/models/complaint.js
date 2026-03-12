@@ -67,6 +67,18 @@ const complaintSchema = mongoose.Schema({
         type: Date,
         default: Date.now
     },
+    assignedOfficerId: {
+        type: String,
+        default: null,
+    },
+    assignedOfficerName: {
+        type: String,
+        default: null,
+    },
+    assignedAt: {
+        type: Date,
+        default: null,
+    },
   
     imagePath: {
         type: String, // Assuming imagePath is a string containing the path to the image file

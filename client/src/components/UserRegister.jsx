@@ -58,10 +58,11 @@ const UserRegister = () => {
 
     const handleActualSubmit = async () => {
         try {
-            const response = await fetch('http://localhost:4000/api/v1/user/', {
+            const payload = { ...userData, password: userData.passwordHash };
+            const response = await fetch('http://localhost:4000/api/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(userData),
+                body: JSON.stringify(payload),
             });
             if (response.ok) {
                 alert('Account Created Successfully! You can now log in.');

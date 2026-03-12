@@ -260,6 +260,7 @@ const ViewComplaintReport = () => {
                              <th className="py-3 text-uppercase text-secondary small fw-bold">Applicant Details</th>
                              <th className="py-3 text-uppercase text-secondary small fw-bold">Department / Type</th>
                              <th className="py-3 text-uppercase text-secondary small fw-bold">Registered On</th>
+                             <th className="py-3 text-uppercase text-secondary small fw-bold">Assigned To</th>
                              <th className="py-3 text-uppercase text-secondary small fw-bold text-center">Status</th>
                              <th className="py-3 px-4 text-uppercase text-secondary small fw-bold text-end">Action</th>
                           </tr>
@@ -284,6 +285,13 @@ const ViewComplaintReport = () => {
                                         <span className="text-dark fw-semibold">{comp.dateCreated ? new Date(comp.dateCreated).toLocaleDateString('en-GB') : 'Unknown'}</span>
                                         <span className="text-muted small"><i className="fa fa-clock-o me-1"></i> {comp.dateCreated ? new Date(comp.dateCreated).toLocaleTimeString('en-GB', { hour: '2-digit', minute:'2-digit' }) : ''}</span>
                                     </div>
+                                </td>
+                                <td>
+                                    {comp.assignedOfficerName ? (
+                                        <span className="badge bg-primary bg-opacity-10 text-primary border border-primary px-3 py-2 rounded-pill shadow-sm" style={{ fontSize: '0.8rem' }}><i className="fa fa-user-circle me-1"></i> {comp.assignedOfficerName}</span>
+                                    ) : (
+                                        <span className="badge bg-light text-secondary border px-3 py-2 rounded-pill shadow-sm" style={{ fontSize: '0.8rem' }}><i className="fa fa-minus-circle me-1"></i> Unassigned</span>
+                                    )}
                                 </td>
                                 <td className="text-center">
                                     {getStatusBadge(comp.status)}

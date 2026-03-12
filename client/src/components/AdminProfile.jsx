@@ -122,7 +122,7 @@ const AdminProfile = () => {
                                     </div>
 
                                     <div className="px-2">
-                                        <button className="btn btn-primary rounded-pill py-2 w-100 fw-bold shadow-sm" onClick={() => LoadEdit(admin.id)}>
+                                        <button className="btn btn-primary rounded-pill py-2 w-100 fw-bold shadow-sm" onClick={() => LoadEdit(admin._id)}>
                                             <i className="fa fa-pencil me-2"></i> Edit Admin Profile
                                         </button>
                                     </div>
