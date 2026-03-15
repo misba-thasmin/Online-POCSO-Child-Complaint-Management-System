@@ -21,7 +21,8 @@ const UserLogin = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:4000/api/auth/login', {
+      // User login route should match the schema and backend router in user.js
+      const response = await axios.post('http://localhost:4000/api/v1/user/login', {
         email: email,
         password: password,
       });

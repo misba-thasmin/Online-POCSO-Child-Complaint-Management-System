@@ -104,10 +104,7 @@ const UpdateAdminProfile = () => {
     <div>
         <div>
       
-        <div className="header-area" id="headerArea">
-        <div className="container h-100 d-flex align-items-center justify-content-between">
-    
-        <div className="header-area" id="headerArea">
+        <div className="header-area glass-nav" id="headerArea" style={{ position: 'sticky', top: 0, zIndex: 1000, padding: '1rem' }}>
         <div className="container h-100 d-flex align-items-center justify-content-between">
             <div className="logo-wrapper" style={{color:'#020310'}}><img src={imgSmall} alt=""/> <Title /> </div>
         
@@ -132,8 +129,6 @@ const UpdateAdminProfile = () => {
           <li><Link to="/admin_home"><i className="lni lni-home"></i>Home</Link></li>
           <li><Logout /></li>  
           </ul>
-      </div>
-      </div>
       </div>
       </div>
 

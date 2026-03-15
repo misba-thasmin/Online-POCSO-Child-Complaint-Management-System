@@ -1,0 +1,17 @@
+{
+  "success": true,
+  "firs": [
+    {
+      "_id": "69b2f74908197e2564528c86",
+      "firNumber": "FIR-2026-0050",
+      "complaintId": null,
+      "policeStation": "Thrissur Town",
+      "date": "2026-03-12T17:26:33.360Z",
+      "investigatorName": "SI Anoop",
+      "documentPath": "public\\uploads\\1773336393352-test.webp",
+      "dateCreated": "2026-03-12T17:26:33.360Z",
+      "__v": 0,
+      "id": "69b2f74908197e2564528c86"
+    }
+  ]
+}

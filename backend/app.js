@@ -62,7 +62,12 @@ const aiRoutes = require('./routes/ai');
 const locationRoutes = require('./routes/location');
 const advocateRoutes = require('./routes/advocate');
 const businesssRoutes = require('./routes/business');
+const advocateRequestRoutes = require('./routes/advocateRequest');
+const advocateRatingRoutes = require('./routes/advocateRating');
+const notificationRoutes = require('./routes/notification');
 const authRoutes = require('./routes/auth');
+const courtAuthRoutes = require('./routes/courtAuth');
+const courtRoutes = require('./routes/court');
 
 
 
@@ -75,6 +80,8 @@ const api = process.env.API_URL;
 
 app.use(`${api}/business`, businesssRoutes);
 app.use(`${api}/advocate`, advocateRoutes);
+app.use(`${api}/advocateRequest`, advocateRequestRoutes);
+app.use(`${api}/advocateRating`, advocateRatingRoutes);
 app.use(`${api}/feedback`, feedbackRoutes);
 app.use(`${api}/user`, userRoutes);
 app.use(`${api}/admin`, adminRoutes);
@@ -82,7 +89,10 @@ app.use(`${api}/officer`, officerRoutes);
 app.use(`${api}/complaint`, complaintRoutes);
 app.use(`${api}/ai`, aiRoutes);
 app.use(`${api}/location`, locationRoutes);
+app.use(`${api}/notification`, notificationRoutes);
 app.use(`/api/auth`, authRoutes);
+app.use(`${api}/court_auth`, courtAuthRoutes);
+app.use(`${api}/court`, courtRoutes);
 
 
 app.use('/public', express.static(path.join(__dirname, 'public')));

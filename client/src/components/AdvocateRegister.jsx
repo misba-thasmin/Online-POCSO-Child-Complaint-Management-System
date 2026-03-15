@@ -63,10 +63,13 @@ const AdvocateRegister = () => {
 
     const handleActualSubmit = async () => {
         try {
+            const payload = { ...userData };
+            // Ensure we are sending what the backend expects. The backend uses req.body.passwordHash
+            // and hashes it there, but here the state is named passwordHash.
             const response = await fetch('http://localhost:4000/api/v1/advocate/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(userData),
+                body: JSON.stringify(payload),
             });
 
             if (response.ok) {

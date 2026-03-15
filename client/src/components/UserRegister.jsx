@@ -58,8 +58,9 @@ const UserRegister = () => {
 
     const handleActualSubmit = async () => {
         try {
-            const payload = { ...userData, password: userData.passwordHash };
-            const response = await fetch('http://localhost:4000/api/auth/register', {
+            // Send to /api/v1/user/ where the auth logic expects it, just like the Advocate
+            const payload = { ...userData };
+            const response = await fetch('http://localhost:4000/api/v1/user/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),

@@ -21,7 +21,12 @@ const PostAdvocate = () => {
     locality: '',
     address: '',
     city: '',
-    mobile: ''
+    mobile: '',
+    experience: '',
+    barCouncilNumber: '',
+    totalCasesHandled: '',
+    completedCases: '',
+    successRate: ''
   });
   const [validationErrors, setValidationErrors] = useState({});
 
@@ -225,6 +230,66 @@ const PostAdvocate = () => {
                     <input className="form-control bg-light border-0" name="mobile" id="mobile" value={formData.mobile} onChange={handleInputChange} type="text" placeholder="10-digit mobile number" style={{ borderTopRightRadius: '10px', borderBottomRightRadius: '10px', padding: '0.75rem 1rem' }} required />
                   </div>
                   {validationErrors.mobile && <div className="text-danger small mt-2 d-flex align-items-center"><i className="fa fa-exclamation-circle me-1"></i>{validationErrors.mobile}</div>}
+                </div>
+
+                <hr className="my-5" style={{ borderColor: '#e2e8f0' }} />
+                
+                <h5 className="mb-4 text-primary" style={{ fontWeight: 600 }}><i className="fa fa-id-card-o me-2"></i>Professional Details</h5>
+
+                {/* Experience & Bar Council */}
+                <div className="row g-3 mb-4">
+                  <div className="col-md-6">
+                    <label className="form-label text-muted small fw-bold mb-2">Years of Experience</label>
+                    <div className="input-group">
+                      <span className="input-group-text bg-light border-0" style={{ borderTopLeftRadius: '10px', borderBottomLeftRadius: '10px' }}>
+                        <i className="fa fa-star text-warning" style={{ width: '16px', textAlign: 'center' }}></i>
+                      </span>
+                      <input className="form-control bg-light border-0" name="experience" id="experience" value={formData.experience} onChange={handleInputChange} type="number" placeholder="Years of practice" style={{ borderTopRightRadius: '10px', borderBottomRightRadius: '10px', padding: '0.75rem 1rem' }} required />
+                    </div>
+                  </div>
+
+                  <div className="col-md-6">
+                    <label className="form-label text-muted small fw-bold mb-2">Bar Council Number</label>
+                    <div className="input-group">
+                      <span className="input-group-text bg-light border-0" style={{ borderTopLeftRadius: '10px', borderBottomLeftRadius: '10px' }}>
+                        <i className="fa fa-certificate text-success" style={{ width: '16px', textAlign: 'center' }}></i>
+                      </span>
+                      <input className="form-control bg-light border-0" name="barCouncilNumber" id="barCouncilNumber" value={formData.barCouncilNumber} onChange={handleInputChange} type="text" placeholder="e.g. MH/1234/2015" style={{ borderTopRightRadius: '10px', borderBottomRightRadius: '10px', padding: '0.75rem 1rem' }} required />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Case Statistics */}
+                <div className="row g-3 mb-4">
+                  <div className="col-md-4">
+                    <label className="form-label text-muted small fw-bold mb-2">Total Cases</label>
+                    <div className="input-group">
+                      <span className="input-group-text bg-light border-0" style={{ borderTopLeftRadius: '10px', borderBottomLeftRadius: '10px' }}>
+                        <i className="fa fa-folder-open text-primary" style={{ width: '16px', textAlign: 'center' }}></i>
+                      </span>
+                      <input className="form-control bg-light border-0" name="totalCasesHandled" id="totalCasesHandled" value={formData.totalCasesHandled} onChange={handleInputChange} type="number" placeholder="Total" style={{ borderTopRightRadius: '10px', borderBottomRightRadius: '10px', padding: '0.75rem 1rem' }} required />
+                    </div>
+                  </div>
+
+                  <div className="col-md-4">
+                    <label className="form-label text-muted small fw-bold mb-2">Completed</label>
+                    <div className="input-group">
+                      <span className="input-group-text bg-light border-0" style={{ borderTopLeftRadius: '10px', borderBottomLeftRadius: '10px' }}>
+                        <i className="fa fa-check-square-o text-success" style={{ width: '16px', textAlign: 'center' }}></i>
+                      </span>
+                      <input className="form-control bg-light border-0" name="completedCases" id="completedCases" value={formData.completedCases} onChange={handleInputChange} type="number" placeholder="Completed" style={{ borderTopRightRadius: '10px', borderBottomRightRadius: '10px', padding: '0.75rem 1rem' }} required />
+                    </div>
+                  </div>
+
+                  <div className="col-md-4">
+                    <label className="form-label text-muted small fw-bold mb-2">Success Rate</label>
+                    <div className="input-group">
+                      <span className="input-group-text bg-light border-0" style={{ borderTopLeftRadius: '10px', borderBottomLeftRadius: '10px' }}>
+                        <i className="fa fa-line-chart text-info" style={{ width: '16px', textAlign: 'center' }}></i>
+                      </span>
+                      <input className="form-control bg-light border-0" name="successRate" id="successRate" value={formData.successRate} onChange={handleInputChange} type="text" placeholder="e.g. 95%" style={{ borderTopRightRadius: '10px', borderBottomRightRadius: '10px', padding: '0.75rem 1rem' }} required />
+                    </div>
+                  </div>
                 </div>
 
                 <div className="mt-5">

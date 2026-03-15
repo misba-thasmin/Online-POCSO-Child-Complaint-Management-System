@@ -36,7 +36,15 @@ router.post('/',  async (req,res)=>{
         address: req.body.address,
         city: req.body.city,
         mobile: req.body.mobile,
-        status: req.body.status
+        status: req.body.status,
+        profilePhoto: req.body.profilePhoto || '',
+        experience: req.body.experience || 0,
+        barCouncilNumber: req.body.barCouncilNumber || '',
+        totalCasesHandled: req.body.totalCasesHandled || 0,
+        completedCases: req.body.completedCases || 0,
+        successRate: req.body.successRate || '0%',
+        caseTypes: req.body.caseTypes || [],
+        portfolio: req.body.portfolio || []
     })
     business = await business.save();
 
@@ -73,7 +81,15 @@ router.put('/:id',async (req, res)=> {
             locality: req.body.locality,
             address: req.body.address,
             city: req.body.city,
-            mobile: req.body.mobile
+            mobile: req.body.mobile,
+            profilePhoto: req.body.profilePhoto,
+            experience: req.body.experience,
+            barCouncilNumber: req.body.barCouncilNumber,
+            totalCasesHandled: req.body.totalCasesHandled,
+            completedCases: req.body.completedCases,
+            successRate: req.body.successRate,
+            caseTypes: req.body.caseTypes,
+            portfolio: req.body.portfolio
         },
         { new: true}
     )

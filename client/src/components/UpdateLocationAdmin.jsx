@@ -103,10 +103,10 @@ const UpdateLocationAdmin = () => {
     <div>
         <div>
       
-        <div className="header-area" id="headerArea">
+        <div className="header-area glass-nav" id="headerArea" style={{ position: 'sticky', top: 0, zIndex: 1000, padding: '1rem' }}>
         <div className="container h-100 d-flex align-items-center justify-content-between">
     
-        <div className="header-area" id="headerArea">
+        <div className="header-area glass-nav" id="headerArea" style={{ position: 'sticky', top: 0, zIndex: 1000, padding: '1rem' }}>
         <div className="container h-100 d-flex align-items-center justify-content-between">
             <div className="logo-wrapper" style={{color:'#020310'}}><img src={imgSmall} alt=""/> <Title /> </div>
         

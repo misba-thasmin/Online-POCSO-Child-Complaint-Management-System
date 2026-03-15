@@ -121,7 +121,7 @@ const UserHome = () => {
               <div className="portal-icon officer-icon">
                 <i className="fa fa-folder-open"></i>
               </div>
-              <h2 className="portal-title">View My Complaint</h2>
+              <h2 className="portal-title">My Complaints</h2>
               <p className="portal-desc">Track the status and updates of your submitted complaints.</p>
               <div className="portal-btn btn-warning-glass">View Status</div>
             </Link>
@@ -131,7 +131,7 @@ const UserHome = () => {
               <div className="portal-icon advocate-icon">
                 <i className="fa fa-balance-scale"></i>
               </div>
-              <h2 className="portal-title">View Advocates</h2>
+              <h2 className="portal-title">Find Advocates</h2>
               <p className="portal-desc">Find and connect with legal advocates for assistance.</p>
               <div className="portal-btn btn-success-glass">Find Advocates</div>
             </Link>
@@ -144,6 +144,16 @@ const UserHome = () => {
               <h2 className="portal-title">My Profile</h2>
               <p className="portal-desc">Manage your account details and personal information.</p>
               <div className="portal-btn btn-danger-glass">Manage Profile</div>
+            </Link>
+
+            {/* Request Legal Help */}
+            <Link to="/view_advocate" className="portal-card" style={{ textDecoration: 'none' }}>
+              <div className="portal-icon" style={{ backgroundColor: 'rgba(139, 92, 246, 0.1)' }}>
+                <i className="fa fa-gavel" style={{ color: '#8b5cf6' }}></i>
+              </div>
+              <h2 className="portal-title">Request Legal Help</h2>
+              <p className="portal-desc">Connect a submitted complaint with an advocate for legal representation.</p>
+              <div className="portal-btn" style={{ backgroundColor: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6', border: '1px solid rgba(139, 92, 246, 0.2)' }}>Get Assistance</div>
             </Link>
           </main>
         </div>

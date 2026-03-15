@@ -2,7 +2,10 @@ const mongoose = require('mongoose');
 
 const complaintSchema = mongoose.Schema({
     
-    
+    complaintId: {
+        type: String,
+        unique: true
+    },
     useremail: {
         type: String,
         required: true,    
@@ -35,10 +38,10 @@ const complaintSchema = mongoose.Schema({
         type: String,
         required:  true,    
     },
-    
     status: {
         type: String,
-        default: 'Pending',   
+        enum: ['Pending Investigation', 'Under Investigation', 'FIR Registered', 'Court Hearing Scheduled', 'Resolved / Closed', 'Rejected'],
+        default: 'Pending Investigation',   
     },
 
     reason: {

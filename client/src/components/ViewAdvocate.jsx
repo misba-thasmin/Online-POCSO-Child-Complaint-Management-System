@@ -15,6 +15,8 @@ import Title from './Title.jsx';
 const ViewAdvocate = () => {
   const [businessData, setBusinessData] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [cityFilter, setCityFilter] = useState('');
+  const [serviceFilter, setServiceFilter] = useState('');
 
   // Apply Light Theme Background
   useEffect(() => {
@@ -40,14 +42,20 @@ const ViewAdvocate = () => {
     fetchBusinessData();
   }, []);
 
-  // Filter data based on search term and "Approved" status
+  // Filter data based on search term, filters, and "Approved" status
   const filteredData = businessData.filter((business) => {
     const isMatch = Object.values(business).some((field) =>
       field && field.toString().toLowerCase().includes(searchTerm.toLowerCase())
     );
+    const matchesCity = cityFilter === '' || (business.city && business.city.toLowerCase() === cityFilter.toLowerCase());
+    const matchesService = serviceFilter === '' || (business.service && business.service.toLowerCase().includes(serviceFilter.toLowerCase()));
     const isApproved = business.status && business.status.toLowerCase() === 'approved';
-    return isMatch && isApproved;
+    return isMatch && matchesCity && matchesService && isApproved;
   });
+
+  // Extract unique cities and services for filter dropdowns
+  const uniqueCities = [...new Set(businessData.map(b => b.city).filter(Boolean))];
+  const uniqueServices = [...new Set(businessData.map(b => b.service).filter(Boolean))];
 
   return (
     <div className="landing-container">
@@ -101,9 +109,9 @@ const ViewAdvocate = () => {
             </h2>
           </div>
 
-          {/* Improved Search Bar */}
-          <div className="row justify-content-center mb-5">
-            <div className="col-12 col-md-8 col-lg-6">
+          {/* Improved Search Bar and Filters */}
+          <div className="row justify-content-center mb-5 g-3">
+            <div className="col-12 col-md-12 col-lg-8">
               <div className="position-relative">
                 <input
                   className="form-control form-control-lg"
@@ -115,6 +123,24 @@ const ViewAdvocate = () => {
                 />
                 <i className="fa fa-search position-absolute" style={{ right: '20px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}></i>
               </div>
+            </div>
+            
+            <div className="col-12 col-md-6 col-lg-4">
+               <select className="form-select form-select-lg" value={cityFilter} onChange={(e) => setCityFilter(e.target.value)} style={{ borderRadius: '30px', border: '1px solid #cbd5e1' }}>
+                 <option value="">All Cities</option>
+                 {uniqueCities.map((city, idx) => (
+                   <option key={idx} value={city}>{city}</option>
+                 ))}
+               </select>
+            </div>
+            
+            <div className="col-12 col-md-6 col-lg-4">
+               <select className="form-select form-select-lg" value={serviceFilter} onChange={(e) => setServiceFilter(e.target.value)} style={{ borderRadius: '30px', border: '1px solid #cbd5e1' }}>
+                 <option value="">All Services</option>
+                 {uniqueServices.map((service, idx) => (
+                   <option key={idx} value={service}>{service}</option>
+                 ))}
+               </select>
             </div>
           </div>
 
@@ -186,9 +212,12 @@ const ViewAdvocate = () => {
                     </div>
 
                     {/* Action Footer */}
-                    <div className="card-footer bg-transparent border-0 px-4 pb-4 pt-2 text-center">
-                      <a className="portal-btn btn-primary-glass d-inline-block text-decoration-none" target="_blank" rel="noopener noreferrer" href={`https://maps.google.com/?q=${business.lat},${business.long}`} style={{ width: '100%' }}>
-                        <i className="fa fa-map-o me-2"></i> Show on Map
+                    <div className="card-footer bg-transparent border-0 px-4 pb-4 pt-2 text-center d-flex gap-2">
+                      <Link to={`/view_advocate_details/${business._id}`} className="portal-btn btn-primary d-inline-block text-decoration-none shadow-sm" style={{ width: '50%', padding: '0.6rem 0', borderRadius: '10px' }}>
+                        <i className="fa fa-user me-2"></i> View Profile
+                      </Link>
+                      <a className="portal-btn btn-outline-primary d-inline-block text-decoration-none" target="_blank" rel="noopener noreferrer" href={`https://maps.google.com/?q=${business.lat},${business.long}`} style={{ width: '50%', padding: '0.6rem 0', borderRadius: '10px' }}>
+                        <i className="fa fa-map-o me-2"></i> Show Map
                       </a>
                     </div>
 

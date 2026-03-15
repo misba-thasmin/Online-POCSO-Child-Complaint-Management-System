@@ -59,8 +59,15 @@ router.post('/', auth, async (req,res)=>{
         if (!assignedOfficer && location) {
             assignedOfficer = await Officer.findOne({ location: { $regex: new RegExp(`^${location}$`, 'i') } });
         }
+
+        // Generate custom complaint ID e.g. CMP-2026-0001
+        const year = new Date().getFullYear();
+        const count = await Complaint.countDocuments();
+        const paddedCount = String(count + 1).padStart(4, '0');
+        const generatedComplaintId = `CMP-${year}-${paddedCount}`;
     
         let complaintData = {
+            complaintId: generatedComplaintId,
             useremail: req.body.useremail,
             name: req.body.name,
             mobile: req.body.mobile,
@@ -76,7 +83,7 @@ router.post('/', auth, async (req,res)=>{
             complaintData.assignedOfficerId = assignedOfficer._id.toString();
             complaintData.assignedOfficerName = assignedOfficer.name;
             complaintData.assignedAt = new Date();
-            complaintData.status = 'In Progress';
+            complaintData.status = 'Under Investigation';
         }
     
         let complaint = new Complaint(complaintData);
@@ -282,6 +289,24 @@ router.put('/assign/:id', auth, async (req, res) => {
 
     } catch (error) {
         console.error('Error assigning complaint:', error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+});
+
+// GET user's eligible complaints (for requesting an advocate)
+router.get('/eligible/:useremail', async (req, res) => {
+    try {
+        const eligibleComplaints = await Complaint.find({
+            useremail: req.params.useremail,
+            status: { $in: ['Under Investigation', 'FIR Registered'] }
+        });
+        
+        if (!eligibleComplaints) {
+            return res.status(404).json({ success: false, message: 'No eligible complaints found' });
+        }
+        res.status(200).send(eligibleComplaints);
+    } catch (error) {
+        console.error('Error fetching eligible complaints:', error);
         res.status(500).json({ success: false, message: 'Internal server error' });
     }
 });

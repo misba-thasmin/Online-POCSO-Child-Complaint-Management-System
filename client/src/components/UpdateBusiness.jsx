@@ -34,6 +34,11 @@ const UpdateBusiness = () => {
     address: '',
     city: '',
     mobile: '',
+    experience: '',
+    barCouncilNumber: '',
+    totalCasesHandled: '',
+    completedCases: '',
+    successRate: ''
   });
   
   const token = localStorage.getItem('token');
@@ -53,6 +58,11 @@ const UpdateBusiness = () => {
             address: data.address ,
             city: data.city ,
             mobile: data.mobile ,
+            experience: data.experience || '',
+            barCouncilNumber: data.barCouncilNumber || '',
+            totalCasesHandled: data.totalCasesHandled || '',
+            completedCases: data.completedCases || '',
+            successRate: data.successRate || ''
           });
         }else {
           console.error('Error fetching business data:', response.statusText);
@@ -111,10 +121,10 @@ const UpdateBusiness = () => {
     <div>
         <div>
       
-        <div className="header-area" id="headerArea">
+        <div className="header-area glass-nav" id="headerArea" style={{ position: 'sticky', top: 0, zIndex: 1000, padding: '1rem' }}>
         <div className="container h-100 d-flex align-items-center justify-content-between">
     
-        <div className="header-area" id="headerArea">
+        <div className="header-area glass-nav" id="headerArea" style={{ position: 'sticky', top: 0, zIndex: 1000, padding: '1rem' }}>
         <div className="container h-100 d-flex align-items-center justify-content-between">
             <div className="logo-wrapper" style={{color:'#020310'}}><img src={imgSmall} alt=""/> <Title /> </div>
         
@@ -209,7 +219,45 @@ const UpdateBusiness = () => {
                   <input className="form-control" name="mobile" id="mobile"
                     value={editedBusiness.mobile}
                     onChange={handleInputChange}   type="text"/>
-                </div>          
+                </div>
+
+                <hr className="my-4" />
+                <h6 className="mb-3 text-primary">Professional Details</h6>
+                
+                <div className="mb-3">
+                  <div className="title mb-2"><span>Years of Experience</span></div>
+                  <input className="form-control" name="experience" id="experience"
+                    value={editedBusiness.experience}
+                    onChange={handleInputChange} type="number" />
+                </div>
+
+                <div className="mb-3">
+                  <div className="title mb-2"><span>Bar Council Number</span></div>
+                  <input className="form-control" name="barCouncilNumber" id="barCouncilNumber"
+                    value={editedBusiness.barCouncilNumber}
+                    onChange={handleInputChange} type="text" />
+                </div>
+
+                <div className="mb-3">
+                  <div className="title mb-2"><span>Total Cases Handled</span></div>
+                  <input className="form-control" name="totalCasesHandled" id="totalCasesHandled"
+                    value={editedBusiness.totalCasesHandled}
+                    onChange={handleInputChange} type="number" />
+                </div>
+
+                <div className="mb-3">
+                  <div className="title mb-2"><span>Completed Cases</span></div>
+                  <input className="form-control" name="completedCases" id="completedCases"
+                    value={editedBusiness.completedCases}
+                    onChange={handleInputChange} type="number" />
+                </div>
+
+                <div className="mb-3">
+                  <div className="title mb-2"><span>Success Rate</span></div>
+                  <input className="form-control" name="successRate" id="successRate"
+                    value={editedBusiness.successRate}
+                    onChange={handleInputChange} type="text" placeholder="e.g. 95%" />
+                </div>
                 
   
                 <button  className="btn btn-success w-100"  type="submit">Submit</button>

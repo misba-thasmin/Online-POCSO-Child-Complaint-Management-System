@@ -77,6 +77,16 @@ const Index = () => {
           <div className="portal-btn btn-danger-glass">Access Portal</div>
         </Link>
 
+        {/* Court Portal */}
+        <Link to="/court_auth" className="portal-card">
+          <div className="portal-icon" style={{ color: '#0ea5e9' }}>
+            <i className="fa fa-university"></i>
+          </div>
+          <h2 className="portal-title">Court Staff Portal</h2>
+          <p className="portal-desc">Manage post-investigation cases, hearings, and judgments.</p>
+          <div className="portal-btn" style={{ background: 'rgba(14, 165, 233, 0.1)', color: '#38bdf8', border: '1px solid rgba(14, 165, 233, 0.3)' }}>Access Portal</div>
+        </Link>
+
         {/* AI Assistant Portal */}
         <Link to="/ai_assistant" className="portal-card">
           <div className="portal-icon" style={{ color: '#a855f7' }}>

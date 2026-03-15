@@ -44,10 +44,19 @@ import UpdateBusiness from './components/UpdateBusiness';
 import ViewAdvocateAdmin from './components/ViewAdvocateAdmin';
 import UpdateAdvocateAdmin from './components/UpdateAdvocateAdmin';
 import ViewAdvocate from './components/ViewAdvocate';
+import ViewAdvocateDetails from './components/ViewAdvocateDetails';
 import ViewMyAdvocate from './components/ViewMyAdvocate';
 import ResetPasswordAdvocate from './components/ResetPasswordAdvocate';
 import EditOfficerProfile from './components/EditOfficerProfile';
 import AiAssistant from './components/AiAssistant';
+import CourtLogin from './components/CourtLogin';
+import CourtRegister from './components/CourtRegister';
+import CourtHome from './components/CourtHome';
+import ManageFIR from './components/ManageFIR';
+import ManageCourtCases from './components/ManageCourtCases';
+import CourtCaseDetails from './components/CourtCaseDetails';
+import ManageHearings from './components/ManageHearings.jsx';
+import ManageJudgments from './components/ManageJudgments.jsx';
 
 function App() {
   return (
@@ -97,9 +106,18 @@ function App() {
           <Route path='/view_my_advocate' element={<ViewMyAdvocate />} />
           <Route path='/update_business/:id' element={<UpdateBusiness />} />
           <Route path='/view_advocate' element={<ViewAdvocate />} />
+          <Route path='/view_advocate_details/:id' element={<ViewAdvocateDetails />} />
           <Route path='/view_advocate_admin' element={<ViewAdvocateAdmin />} />
           <Route path='/update_advocate_admin/:id' element={<UpdateAdvocateAdmin />} />
           <Route path='/ai_assistant' element={<AiAssistant />} />
+          <Route path='/court_auth' element={<CourtLogin />} />
+          <Route path='/court_register' element={<CourtRegister />} />
+          <Route path='/court_home' element={<CourtHome />} />
+          <Route path='/manage_firs' element={<ManageFIR />} />
+          <Route path='/manage_court_cases' element={<ManageCourtCases />} />
+          <Route path='/court_case/:id' element={<CourtCaseDetails />} />
+          <Route path='/manage_hearings' element={<ManageHearings />} />
+          <Route path='/manage_judgments' element={<ManageJudgments />} />
 
 
 

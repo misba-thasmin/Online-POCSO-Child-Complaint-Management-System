@@ -44,6 +44,38 @@ const businessSchema = mongoose.Schema({
         type: String,
         default: 'Pending',   
     },
+    profilePhoto: {
+        type: String,
+        default: ''
+    },
+    experience: {
+        type: Number,
+        default: 0
+    },
+    barCouncilNumber: {
+        type: String,
+        default: ''
+    },
+    totalCasesHandled: {
+        type: Number,
+        default: 0
+    },
+    completedCases: {
+        type: Number,
+        default: 0
+    },
+    successRate: {
+        type: String,
+        default: '0%'
+    },
+    caseTypes: [{
+        type: String
+    }],
+    portfolio: [{
+        title: String,
+        description: String,
+        caseType: String
+    }],
     dateCreated: {
         type: Date,
         default: Date.now,
