@@ -120,7 +120,7 @@ const UpdateAdminProfile = () => {
         <div className="sidenav-profile">
           <div className="user-profile"><img src={imgBg} alt=""/></div>
           <div className="user-info">
-           <h6 className="user-name mb-1">Online Complaint Registration Management System</h6>
+           <h6 className="user-name mb-1">Online POCSO Child Safety Complaint Management System Management System</h6>
          
           </div>
         </div>

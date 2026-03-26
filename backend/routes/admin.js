@@ -1,11 +1,49 @@
 const { Admin } = require('../models/admin');
+const { Complaint } = require('../models/complaint');
+const { Advocate } = require('../models/advocate');
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 
+// Analytics / Reports endpoint for Admin
+router.get('/reports/statistics', async (req, res) => {
+    try {
+        // 1. Total Complaints
+        const totalComplaints = await Complaint.countDocuments();
+        
+        // 2. Complaints by Status
+        const pending = await Complaint.countDocuments({ status: 'pending' });
+        const inProgress = await Complaint.countDocuments({ status: { $in: ['on-progress', 'in-progress'] } });
+        const resolved = await Complaint.countDocuments({ status: { $in: ['resolved', 'closed'] } });
+        
+        // 3. Complaints by Category (Department)
+        const categoriesData = await Complaint.aggregate([
+            { $group: { _id: "$department", count: { $sum: 1 } } }
+        ]);
+        
+        // 4. Complaints by Location (District)
+        const locationsData = await Complaint.aggregate([
+            { $group: { _id: "$location", count: { $sum: 1 } } }
+        ]);
 
+        // 5. Total Advocates Active
+        const totalAdvocates = await Advocate.countDocuments({ status: 'approved' });
+
+        res.status(200).json({
+            success: true,
+            totalComplaints,
+            statusCounts: { pending, inProgress, resolved },
+            categories: categoriesData,
+            locations: locationsData,
+            totalAdvocates
+        });
+    } catch (error) {
+        console.error('Error fetching statistics:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
 router.get(`/`, async (req, res) => {
     const adminList = await Admin.find().select('-passwordHash');
     if (!adminList) {

@@ -258,6 +258,23 @@ const AdminHome = () => {
               </Link>
             </div>
 
+            {/* View Activity Logs */}
+            <div className="col">
+              <Link to="/admin_activity_logs" style={{ textDecoration: 'none' }}>
+                <div className="card h-100 shadow-sm border-0 portal-card" style={{ backgroundColor: '#ffffff', borderRadius: '20px', transition: 'all 0.3s ease' }}>
+                  <div className="card-body p-4 d-flex align-items-center">
+                    <div className="icon-wrapper bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-4" style={{ width: '60px', height: '60px', minWidth: '60px' }}>
+                      <i className="fa fa-history text-primary" style={{ fontSize: '24px' }}></i>
+                    </div>
+                    <div>
+                      <h5 className="card-title fw-bold text-dark mb-1">Activity Logs</h5>
+                      <p className="card-text text-muted small mb-0">Monitor all system events and actions</p>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            </div>
+
             {/* My Profile */}
             <div className="col">
               <Link to="/admin_profile" style={{ textDecoration: 'none' }}>

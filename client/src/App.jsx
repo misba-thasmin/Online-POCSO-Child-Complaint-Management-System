@@ -22,7 +22,7 @@ import OfficerHome from './components/OfficerHome';
 import UpdateStatusOfficer from './components/UpdateStatusOfficer';
 import Customers from './components/Customers';
 import ViewFeedback from './components/ViewFeedback';
-import ViewComplaintReport from './components/ViewComplaintReport';
+import ViewComplaintReportAdmin from './components/ViewComplaintReportAdmin';
 import StatusCount from './components/StatusCount';
 import ViewOfficerAdmin from './components/ViewOfficerAdmin';
 import OfficerProfile from './components/OfficerProfile';
@@ -57,6 +57,7 @@ import ManageCourtCases from './components/ManageCourtCases';
 import CourtCaseDetails from './components/CourtCaseDetails';
 import ManageHearings from './components/ManageHearings.jsx';
 import ManageJudgments from './components/ManageJudgments.jsx';
+import ActivityLogsDashboard from './components/ActivityLogsDashboard';
 
 function App() {
   return (
@@ -85,7 +86,7 @@ function App() {
           <Route path='/update_status_officer/:id' element={<UpdateStatusOfficer />} />
           <Route path='/customers' element={<Customers />} />
           <Route path='/view_feedback' element={<ViewFeedback />} />
-          <Route path='/view_complaint_report' element={<ViewComplaintReport />} />
+          <Route path='/view_complaint_report' element={<ViewComplaintReportAdmin />} />
           <Route path='/status_count' element={<StatusCount />} />
           <Route path='/view_officer_admin' element={<ViewOfficerAdmin />} />
           <Route path='/officer_profile' element={<OfficerProfile />} />
@@ -118,6 +119,7 @@ function App() {
           <Route path='/court_case/:id' element={<CourtCaseDetails />} />
           <Route path='/manage_hearings' element={<ManageHearings />} />
           <Route path='/manage_judgments' element={<ManageJudgments />} />
+          <Route path='/admin_activity_logs' element={<ActivityLogsDashboard />} />
 
 
 

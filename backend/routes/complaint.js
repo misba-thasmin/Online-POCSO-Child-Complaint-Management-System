@@ -1,5 +1,9 @@
 const {Complaint} = require('../models/complaint');
 const {Officer} = require('../models/officer');
+const {User} = require('../models/user');
+const {Notification} = require('../models/notification');
+const { ActivityLog } = require('../models/activityLog');
+const { AdvocateRequest } = require('../models/advocateRequest');
 const express = require('express');
 const router = express.Router();
 const auth = require('../helpers/jwt');
@@ -47,6 +51,8 @@ router.get(`/:id`, async (req, res) =>{
 
 router.post('/', auth, async (req,res)=>{
     try {
+        console.log("Complaint received:", req.body);
+        
         // Attempt to find an officer matching the district or location
         const { district, location } = req.body;
         
@@ -65,10 +71,12 @@ router.post('/', auth, async (req,res)=>{
         const count = await Complaint.countDocuments();
         const paddedCount = String(count + 1).padStart(4, '0');
         const generatedComplaintId = `CMP-${year}-${paddedCount}`;
+        
+        const currentUserEmail = (req.user && req.user.useremail) ? req.user.useremail : req.body.useremail;
     
         let complaintData = {
             complaintId: generatedComplaintId,
-            useremail: req.body.useremail,
+            useremail: currentUserEmail,
             name: req.body.name,
             mobile: req.body.mobile,
             address: req.body.address,
@@ -80,7 +88,7 @@ router.post('/', auth, async (req,res)=>{
         
         // Auto-assign if an officer was found
         if (assignedOfficer) {
-            complaintData.assignedOfficerId = assignedOfficer._id.toString();
+            complaintData.assignedOfficer = assignedOfficer._id;
             complaintData.assignedOfficerName = assignedOfficer.name;
             complaintData.assignedAt = new Date();
             complaintData.status = 'Under Investigation';
@@ -92,7 +100,46 @@ router.post('/', auth, async (req,res)=>{
         if(!complaint)
             return res.status(400).send('the complaint cannot be created!')
             
-        res.send(complaint);
+        // Find User to create notification
+        const user = await User.findOne({ email: currentUserEmail });
+        if (user) {
+            let userNotif = new Notification({
+                userId: user._id,
+                userType: 'User',
+                message: `Your complaint (${generatedComplaintId}) has been successfully submitted.`
+            });
+            await userNotif.save();
+        }
+
+        // Create activity log for complaint creation
+        let log = new ActivityLog({
+            userRole: 'User', // Assuming the user creating the complaint is a 'User'
+            userId: user ? user._id : currentUserEmail, // Get user ID from the user document instead of missing token payload
+            action: 'Complaint Created',
+            description: `New complaint (${generatedComplaintId}) created by ${currentUserEmail}.`
+        });
+        await log.save();
+
+        // Create advocate request if advocateId is provided
+        if (req.body.advocateId && user) {
+            let advocateReq = new AdvocateRequest({
+                userId: user._id,
+                advocateId: req.body.advocateId,
+                complaintId: complaint._id,
+                caseDescription: `Legal assistance requested for complaint ID: ${generatedComplaintId}. Description: ${req.body.writecomplaint}`
+            });
+            await advocateReq.save();
+            
+            // Generate notification for the advocate
+            let advNotif = new Notification({
+                userId: req.body.advocateId,
+                userType: 'Business',
+                message: `You have received a new legal assistance request for complaint: ${generatedComplaintId}.`
+            });
+            await advNotif.save();
+        }
+
+        res.status(201).json({ message: "Complaint submitted successfully", complaint });
     } catch (error) {
         console.error('Error creating complaint:', error);
         res.status(500).json({ success: false, message: 'Server Error' });
@@ -267,7 +314,7 @@ router.put('/assign/:id', auth, async (req, res) => {
             return res.status(404).json({ success: false, message: 'Complaint not found.' });
         }
 
-        if (complaint.assignedOfficerId) {
+        if (complaint.assignedOfficer) {
             return res.status(400).json({ success: false, message: 'This complaint is already being handled by another officer.' });
         }
 
@@ -276,7 +323,7 @@ router.put('/assign/:id', auth, async (req, res) => {
             complaintId,
             { 
                 $set: { 
-                    assignedOfficerId: officerId,
+                    assignedOfficer: officerId,
                     assignedOfficerName: officerName,
                     assignedAt: new Date(),
                     status: 'In Progress' 
@@ -284,6 +331,17 @@ router.put('/assign/:id', auth, async (req, res) => {
             },
             { new: true }
         );
+
+        // Notify User
+        const user = await User.findOne({ email: updatedComplaint.useremail });
+        if (user) {
+            let userNotif = new Notification({
+                userId: user._id,
+                userType: 'User',
+                message: `Officer ${officerName} has been assigned to investigate your complaint (${updatedComplaint.complaintId}).`
+            });
+            await userNotif.save();
+        }
 
         res.status(200).json({ success: true, message: 'Complaint assigned successfully.', complaint: updatedComplaint });
 

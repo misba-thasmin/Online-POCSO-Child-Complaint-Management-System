@@ -29,7 +29,7 @@ const PostComplaint = () => {
   });
 
   const [validationErrors, setValidationErrors] = useState({});
-  const [location, setLocation] = useState([]);
+  const [advocates, setAdvocates] = useState([]);
 
   // Add light background for the entire page to match portal
   useEffect(() => {
@@ -39,7 +39,24 @@ const PostComplaint = () => {
     }
   }, []);
 
+  useEffect(() => {
+    const fetchAdvocates = async () => {
+      try {
+        const response = await fetch('http://localhost:4000/api/v1/business');
+        if (response.ok) {
+          const data = await response.json();
+          const approvedAdvocates = data.filter(adv => adv.status && adv.status.toLowerCase() === 'approved');
+          setAdvocates(approvedAdvocates);
+        }
+      } catch (error) {
+        console.error('Error fetching advocates data:', error.message);
+      }
+    };
+    fetchAdvocates();
+  }, []);
+
   const postComplaintData = async () => {
+    console.log(formData);
     const token = localStorage.getItem('token');
     const userEmail = decodeURIComponent(document.cookie.replace(/(?:(?:^|.*;\s*)email\s*=\s*([^;]*).*$)|^.*$/, '$1'));
     try {
@@ -58,31 +75,33 @@ const PostComplaint = () => {
       if (response.ok) {
         console.log('Complaint data posted successfully!');
         alert('Complaint Registered Successfully!');
-        window.location.href = "user_home";
+        
+        // Form resets after submission
+        setFormData({
+          useremail: '',
+          name: '',
+          mobile: '',
+          address: '',
+          district: '',
+          location: '',
+          department: '',
+          writecomplaint: '',
+          advocateId: ''
+        });
+        
+        window.location.href = "/user_home";
       } else {
+        const errorText = await response.text();
         console.error('Error posting Complaint data:', response.statusText);
+        alert('Failed to submit complaint: ' + errorText);
       }
     } catch (error) {
       console.error('Error posting Complaint data:', error.message);
+      alert('Error submitting complaint: ' + error.message);
     }
   };
 
-  useEffect(() => {
-    const fetchLocation = async () => {
-      try {
-        const response = await fetch('http://localhost:4000/api/v1/location');
-        if (response.ok) {
-          const data = await response.json();
-          setLocation(data);
-        } else {
-          console.error('Error fetching location data:', response.statusText);
-        }
-      } catch (error) {
-        console.error('Error fetching location data:', error.message);
-      }
-    };
-    fetchLocation();
-  }, []);
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -110,6 +129,7 @@ const PostComplaint = () => {
   // OnForm Submit
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log("Submit clicked");
     if (!validateForm()) {
       return;
     }
@@ -141,7 +161,7 @@ const PostComplaint = () => {
           <div className="sidenav-profile" style={{ padding: '1rem', textAlign: 'center' }}>
             <div className="user-profile mb-3"><img src={imgBg} alt="" style={{ width: '80px', borderRadius: '50%' }} /></div>
             <div className="user-info">
-              <h6 className="user-name mb-1" style={{ color: '#1e293b' }}>Online Complaint Registration</h6>
+              <h6 className="user-name mb-1" style={{ color: '#1e293b' }}>Online POCSO Child Safety Complaint Management System</h6>
             </div>
           </div>
 
@@ -216,20 +236,31 @@ const PostComplaint = () => {
                     <label className="form-label" style={{ fontWeight: '500', color: '#475569' }}>District</label>
                     <div className="input-group">
                       <span className="input-group-text" style={{ backgroundColor: '#f8fafc', borderRight: 'none' }}><i className="fa fa-building text-muted"></i></span>
-                      <input className="form-control" name="district" id="district" value={formData.district} onChange={handleInputChange} type="text" placeholder="E.g., Ernakulam" style={{ borderLeft: 'none' }} required />
+                      <select className="form-select" name="district" id="district" value={formData.district} onChange={handleInputChange} style={{ borderLeft: 'none' }} required>
+                        <option value="">Select District...</option>
+                        <option value="Thiruvananthapuram">Thiruvananthapuram</option>
+                        <option value="Kollam">Kollam</option>
+                        <option value="Pathanamthitta">Pathanamthitta</option>
+                        <option value="Alappuzha">Alappuzha</option>
+                        <option value="Kottayam">Kottayam</option>
+                        <option value="Idukki">Idukki</option>
+                        <option value="Ernakulam">Ernakulam</option>
+                        <option value="Thrissur">Thrissur</option>
+                        <option value="Palakkad">Palakkad</option>
+                        <option value="Malappuram">Malappuram</option>
+                        <option value="Kozhikode">Kozhikode</option>
+                        <option value="Wayanad">Wayanad</option>
+                        <option value="Kannur">Kannur</option>
+                        <option value="Kasaragod">Kasaragod</option>
+                      </select>
                     </div>
                   </div>
 
                   <div className="col-md-6">
-                    <label className="form-label" style={{ fontWeight: '500', color: '#475569' }}>Select Location</label>
+                    <label className="form-label" style={{ fontWeight: '500', color: '#475569' }}>Location</label>
                     <div className="input-group">
                       <span className="input-group-text" style={{ backgroundColor: '#f8fafc', borderRight: 'none' }}><i className="fa fa-map text-muted"></i></span>
-                      <select className="form-select" name="location" value={formData.location} onChange={handleInputChange} style={{ borderLeft: 'none' }} required>
-                        <option value="">Choose a location...</option>
-                        {location.map(loc => (
-                          <option key={loc._id} value={loc.location}>{loc.location}</option>
-                        ))}
-                      </select>
+                      <input className="form-control" name="location" id="location" value={formData.location} onChange={handleInputChange} type="text" placeholder="Enter location manually" style={{ borderLeft: 'none' }} required />
                     </div>
                   </div>
                 </div>
@@ -246,13 +277,20 @@ const PostComplaint = () => {
                       <span className="input-group-text" style={{ backgroundColor: '#f8fafc', borderRight: 'none' }}><i className="fa fa-tags text-muted"></i></span>
                       <select className="form-select" name="department" id="department" value={formData.department} onChange={handleInputChange} style={{ borderLeft: 'none' }} required>
                         <option value="">Select Category...</option>
-                        <option value="Education">Education</option>
-                        <option value="Child health, care, welfare or child development">Child health, care, welfare or child development</option>
-                        <option value="Law relating to Child Rights">Law relating to Child Rights</option>
-                        <option value="Elimination of Child Labour">Elimination of Child Labour</option>
-                        <option value="Juvenile Justice">Juvenile Justice</option>
-                        <option value="Child Psychology or Sociology">Child Psychology or Sociology</option>
-                        <option value="Harassment">Harassment</option>
+                        <option value="Sexual Harassment of a Child">Sexual Harassment of a Child</option>
+                        <option value="Sexual Assault">Sexual Assault</option>
+                        <option value="Attempted Sexual Assault">Attempted Sexual Assault</option>
+                        <option value="Online Sexual Exploitation">Online Sexual Exploitation</option>
+                        <option value="Child Pornography">Child Pornography</option>
+                        <option value="Physical Abuse of Child">Physical Abuse of Child</option>
+                        <option value="School Abuse by Staff">School Abuse by Staff</option>
+                        <option value="Child Trafficking">Child Trafficking</option>
+                        <option value="Kidnapping / Missing Child">Kidnapping / Missing Child</option>
+                        <option value="Forced Child Labour">Forced Child Labour</option>
+                        <option value="Child Neglect">Child Neglect</option>
+                        <option value="Cyber Bullying">Cyber Bullying</option>
+                        <option value="Online Grooming">Online Grooming</option>
+                        <option value="Emotional Abuse">Emotional Abuse</option>
                       </select>
                     </div>
                   </div>
@@ -270,6 +308,22 @@ const PostComplaint = () => {
                       style={{ borderRadius: '8px', padding: '12px' }}
                       required
                     ></textarea>
+                  </div>
+                  
+                  <div className="col-md-12">
+                    <label className="form-label" style={{ fontWeight: '500', color: '#475569' }}>Select Advocate (optional)</label>
+                    <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '8px' }}>
+                      If you select an advocate, a legal assistance request will be sent to them along with this complaint.
+                    </p>
+                    <div className="input-group">
+                      <span className="input-group-text" style={{ backgroundColor: '#f8fafc', borderRight: 'none' }}><i className="fa fa-balance-scale text-muted"></i></span>
+                      <select className="form-select" name="advocateId" id="advocateId" value={formData.advocateId || ''} onChange={handleInputChange} style={{ borderLeft: 'none' }}>
+                        <option value="">No Advocate Selected</option>
+                        {advocates.map(advocate => (
+                          <option key={advocate._id} value={advocate._id}>{advocate.name} ({advocate.service})</option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
                 </div>
 

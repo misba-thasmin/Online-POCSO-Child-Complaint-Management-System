@@ -70,9 +70,10 @@ const complaintSchema = mongoose.Schema({
         type: Date,
         default: Date.now
     },
-    assignedOfficerId: {
-        type: String,
-        default: null,
+    assignedOfficer: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Officer',
+        required: false,
     },
     assignedOfficerName: {
         type: String,

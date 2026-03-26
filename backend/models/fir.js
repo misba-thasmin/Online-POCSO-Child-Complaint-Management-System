@@ -27,6 +27,10 @@ const firSchema = new mongoose.Schema({
     documentPath: {
         type: String,
     },
+    createdByOfficerId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Officer',
+    },
     dateCreated: {
         type: Date,
         default: Date.now,

@@ -116,7 +116,7 @@ const Index = () => {
 
       {/* Footer */}
       <footer className="landing-footer">
-        <p>&copy; {new Date().getFullYear()} Online Complaint Registration Management System. All Rights Reserved.</p>
+        <p>&copy; {new Date().getFullYear()} Online POCSO Child Safety Complaint Management System. All Rights Reserved.</p>
       </footer>
     </div>
   );

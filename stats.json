@@ -1,0 +1,39 @@
+[
+  {
+    "id": "65eac228cad04c06f40a93f5",
+    "location": "Chennai"
+  },
+  {
+    "id": "65f2deb006675215d4e00f8d",
+    "location": "Mumbai"
+  },
+  {
+    "id": "66750dc3a9057a2c08251d3b",
+    "location": "Chennai"
+  },
+  {
+    "id": "69a0050d08aef42858da47ea",
+    "location": "Hyderabad"
+  },
+  {
+    "id": "69a0061208aef42858da4802",
+    "location": ""
+  },
+  {
+    "id": "69a7af0d0baaa93aa0a0dd9f",
+    "location": "Chennai"
+  },
+  {
+    "id": "69ae94711d9cf420f4f205be",
+    "location": "Delhi"
+  },
+  {
+    "id": "69b1c851023b1d271c64acba",
+    "location": ""
+  },
+  {
+    "id": "69b24ed2bdbe6e3a18c44be9",
+    "location": "Thrissur",
+    "district": "Thrissur"
+  }
+]

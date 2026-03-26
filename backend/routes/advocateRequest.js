@@ -1,4 +1,6 @@
 const { AdvocateRequest } = require('../models/advocateRequest');
+const { Notification } = require('../models/notification');
+const { Advocate } = require('../models/advocate');
 const express = require('express');
 const router = express.Router();
 
@@ -59,6 +61,19 @@ router.put('/:id/status', async (req, res) => {
 
     if (!request)
         return res.status(400).send('The request cannot be updated!');
+
+    // Notify User
+    if (req.body.status !== 'Pending') {
+        const advocate = await Advocate.findById(request.advocateId);
+        if (advocate) {
+            let userNotif = new Notification({
+                userId: request.userId,
+                userType: 'User',
+                message: `Advocate ${advocate.name} has ${req.body.status.toLowerCase()} your legal assistance request for complaint (${request.complaintId}).`
+            });
+            await userNotif.save();
+        }
+    }
 
     res.send(request);
 });

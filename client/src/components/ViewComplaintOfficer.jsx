@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { Modal, Button } from 'react-bootstrap';
 
 import "./css/bootstrap.min.css";
 import "./css/font-awesome.min.css";
@@ -12,6 +13,8 @@ import imgSmall from "./img/core-img/logo-small.png";
 import imgBg from "./img/bg-img/9.png";
 import Logout from './Logout.jsx';
 import Title from './Title.jsx';
+import ComplaintTimeline from './ComplaintTimeline.jsx';
+import EvidenceSection from './EvidenceSection.jsx';
 
 const ViewComplaintOfficer = () => {
   const navigate = useNavigate();
@@ -19,6 +22,18 @@ const ViewComplaintOfficer = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [currentOfficer, setCurrentOfficer] = useState(null);
+
+  // FIR Modal State
+  const [showFIRModal, setShowFIRModal] = useState(false);
+  const [selectedComplaintId, setSelectedComplaintId] = useState(null);
+  const [firFormData, setFIRFormData] = useState({
+      firNumber: '',
+      policeStation: '',
+      investigatorName: '',
+      firDate: new Date().toISOString().split('T')[0]
+  });
+  const [firFile, setFIRFile] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Read officer details
   const officeremail = document.cookie.replace(/(?:(?:^|.*;\s*)officeremail\s*\=\s*([^;]*).*$)|^.*$/, '$1');
@@ -82,13 +97,16 @@ const ViewComplaintOfficer = () => {
 
   useEffect(() => {
     const fetchComplaintData = async () => {
+      if (!currentOfficer) return;
       try {
-        const response = await axios.get(`http://localhost:4000/api/v1/complaint/`);
-        if (response.status === 200) {
-          setComplaintData(response.data);
+        const officerId = currentOfficer._id || currentOfficer.id;
+        const response = await axios.get(`http://localhost:4000/api/v1/officer/complaints/${officerId}`);
+        if (response.status === 200 && response.data.success) {
+          console.log("Complaints fetched length: ", response.data.complaints.length);
+          setComplaintData(response.data.complaints);
           setLoading(false);
         } else {
-          console.error('Error fetching Complaint data:', response.statusText);
+          console.error('Error fetching Complaint data from API');
           setLoading(false);
         }
       } catch (error) {
@@ -97,38 +115,61 @@ const ViewComplaintOfficer = () => {
       }
     };
 
-    fetchComplaintData();
-  }, []);
+    if (currentOfficer) {
+        fetchComplaintData();
+    }
+  }, [currentOfficer]);
 
-  // Filter data to show complaints assigned to the officer OR matching their location/district
+  // Filter data to only apply search term (since location filter is already handled by API)
   const filteredData = complaintData.filter((complaint) => {
-    if (!currentOfficer) return false;
-
-    const officerLoc = (currentOfficer.location || '').toLowerCase().trim();
-    const officerDist = (currentOfficer.district || '').toLowerCase().trim();
-    const officerCity = (currentOfficer.city || '').toLowerCase().trim();
-
-    const compDist = (complaint.district || '').toLowerCase().trim();
-    const compLoc = (complaint.location || '').toLowerCase().trim();
-
-    // Check if location matches
-    const isLocationMatch = 
-      (officerLoc && (compDist === officerLoc || compLoc === officerLoc)) ||
-      (officerDist && (compDist === officerDist || compLoc === officerDist)) ||
-      (officerCity && (compDist === officerCity || compLoc === officerCity));
-
-    // Also include if explicitly assigned to this officer
-    const isAssignedToCurrentOfficer = complaint.assignedOfficerId === (currentOfficer._id || currentOfficer.id);
-    
-    // If it doesn't match location and isn't assigned to them, hide it
-    if (!isLocationMatch && !isAssignedToCurrentOfficer) return false;
-
     const isSearchTermMatch = Object.values(complaint).some((field) =>
       field && field.toString().toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return isSearchTermMatch;
   });
+
+  const handleOpenFIRModal = (complaint) => {
+      setSelectedComplaintId(complaint._id || complaint.id);
+      setFIRFormData({
+          firNumber: `FIR-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
+          policeStation: currentOfficer?.policeStation || '',
+          investigatorName: currentOfficer?.name || '',
+          firDate: new Date().toISOString().split('T')[0]
+      });
+      setShowFIRModal(true);
+  };
+
+  const handleFIRSubmit = async (e) => {
+      e.preventDefault();
+      setIsSubmitting(true);
+      
+      const formData = new FormData();
+      formData.append('firNumber', firFormData.firNumber);
+      formData.append('complaintId', selectedComplaintId);
+      formData.append('policeStation', firFormData.policeStation);
+      formData.append('investigatorName', firFormData.investigatorName);
+      formData.append('officerId', currentOfficer._id || currentOfficer.id);
+      if (firFile) formData.append('document', firFile);
+
+      try {
+          const res = await axios.post('http://localhost:4000/api/v1/officer/register-fir', formData, {
+              headers: { 'Content-Type': 'multipart/form-data' }
+          });
+          if (res.data.success) {
+              alert("FIR Registered Successfully!");
+              setShowFIRModal(false);
+              // Refresh complaint data to show updated status
+              const response = await axios.get(`http://localhost:4000/api/v1/complaint/`);
+              setComplaintData(response.data);
+          }
+      } catch (err) {
+          console.error("FIR Error:", err);
+          alert("Failed to register FIR: " + (err.response?.data?.error || err.message));
+      } finally {
+          setIsSubmitting(false);
+      }
+  };
 
   if (loading) {
     return <div className="text-center mt-5">Loading...</div>;
@@ -282,6 +323,20 @@ const ViewComplaintOfficer = () => {
                           </div>
                         </div>
 
+                        {/* Case Timeline */}
+                        <div className="col-12 mt-4">
+                           <ComplaintTimeline status={complaint.status} />
+                        </div>
+
+                        {/* Evidence Section */}
+                        <div className="col-12 mt-2">
+                           <EvidenceSection 
+                               complaintId={complaint._id || complaint.id} 
+                               currentUserRole="Officer"
+                               currentUserId={currentOfficer ? (currentOfficer._id || currentOfficer.id) : null}
+                           />
+                        </div>
+
                         {/* Image Proofs */}
                         {(complaint.image1 || complaint.imagePath) && (
                           <div className="col-12 d-flex gap-3 flex-wrap mt-2">
@@ -311,14 +366,21 @@ const ViewComplaintOfficer = () => {
                     <div className="card-footer bg-transparent border-0 px-4 pb-4 pt-0">
                       <div className="d-flex flex-wrap gap-2 align-items-center pt-3" style={{ borderTop: '1px solid #f1f5f9' }}>
                         
-                        {!complaint.assignedOfficerId ? (
+                        {!complaint.assignedOfficer ? (
                             <button className="btn btn-sm btn-primary py-2 px-3 fw-bold" onClick={() => assignComplaint(complaint._id)} style={{ borderRadius: '8px' }}>
                                 <i className="fa fa-briefcase me-1"></i> Work on Case
                             </button>
-                        ) : complaint.assignedOfficerId === (currentOfficer?._id || currentOfficer?.id) ? (
+                        ) : complaint.assignedOfficer === (currentOfficer?._id || currentOfficer?.id) ? (
                             <>
                                 <span className="badge bg-success px-3 py-2" style={{ borderRadius: '8px', fontSize: '13px' }}><i className="fa fa-check-circle me-1"></i> Assigned to You</span>
                                 <button className="btn btn-sm btn-outline-primary" onClick={() => UpdateStatusAdmin(complaint._id)} style={{ borderRadius: '8px' }}><i className="fa fa-pencil-square-o me-1"></i> Update Status</button>
+                                
+                                {/* Only show Register FIR if status is not already FIR Registered or beyond */}
+                                {(!complaint.status || (complaint.status.toLowerCase() !== 'fir registered' && !complaint.status.toLowerCase().includes('case') && !complaint.status.toLowerCase().includes('hearing') && !complaint.status.toLowerCase().includes('closed'))) && (
+                                    <button className="btn btn-sm btn-danger px-4 py-2 fw-bold shadow-sm" onClick={() => handleOpenFIRModal(complaint)} style={{ borderRadius: '8px' }}>
+                                        <i className="fa fa-file-text me-1"></i> Register FIR
+                                    </button>
+                                )}
                             </>
                         ) : (
                             <span className="badge bg-secondary px-3 py-2 text-white" style={{ borderRadius: '8px', fontSize: '13px' }}><i className="fa fa-lock me-1"></i> Assigned to: {complaint.assignedOfficerName}</span>
@@ -342,6 +404,53 @@ const ViewComplaintOfficer = () => {
 
         </div>
       </div>
+
+      {/* FIR Registration Modal */}
+      <Modal show={showFIRModal} onHide={() => setShowFIRModal(false)} centered size="lg">
+          <Modal.Header closeButton style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)', color: 'white' }}>
+              <Modal.Title className="fw-bold"><i className="fa fa-shield me-2"></i>Official FIR Registration</Modal.Title>
+          </Modal.Header>
+          <form onSubmit={handleFIRSubmit}>
+              <Modal.Body className="p-4" style={{ backgroundColor: '#fdfdfd' }}>
+                  <div className="alert alert-info py-2 small mb-4">
+                      <i className="fa fa-info-circle me-2"></i> This will formally register an FIR for <strong>Complaint ID: {selectedComplaintId?.substring(selectedComplaintId.length - 8)}</strong>.
+                  </div>
+                  <div className="row g-3">
+                      <div className="col-md-6">
+                          <label className="form-label small fw-bold text-muted">FIR Number</label>
+                          <input type="text" className="form-control" value={firFormData.firNumber} onChange={e => setFIRFormData({...firFormData, firNumber: e.target.value})} required />
+                      </div>
+                      <div className="col-md-6">
+                          <label className="form-label small fw-bold text-muted">FIR Date</label>
+                          <input type="date" className="form-control" value={firFormData.firDate} onChange={e => setFIRFormData({...firFormData, firDate: e.target.value})} required />
+                      </div>
+                      <div className="col-md-6">
+                          <label className="form-label small fw-bold text-muted">Police Station</label>
+                          <input type="text" className="form-control" value={firFormData.policeStation} onChange={e => setFIRFormData({...firFormData, policeStation: e.target.value})} required />
+                      </div>
+                      <div className="col-md-6">
+                          <label className="form-label small fw-bold text-muted">Investigating Officer</label>
+                          <input type="text" className="form-control" value={firFormData.investigatorName} disabled />
+                      </div>
+                      <div className="col-12 mt-4">
+                          <div className="p-3 border rounded-3 bg-white shadow-sm">
+                              <label className="form-label small fw-bold text-dark d-block mb-3">Upload Formal FIR Document (PDF/Image)</label>
+                              <input type="file" className="form-control" onChange={e => setFIRFile(e.target.files[0])} accept="image/*,.pdf" />
+                              <div className="mt-2 text-muted" style={{ fontSize: '0.75rem' }}>
+                                  <i className="fa fa-exclamation-triangle me-1"></i> Document must be clearly readable for legal verification.
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </Modal.Body>
+              <Modal.Footer className="bg-light border-0">
+                  <Button variant="outline-secondary" className="rounded-pill px-4" onClick={() => setShowFIRModal(false)}>Cancel</Button>
+                  <Button variant="danger" type="submit" className="rounded-pill px-4 fw-bold" disabled={isSubmitting}>
+                      {isSubmitting ? <><i className="fa fa-spinner fa-spin me-2"></i>Processing...</> : <><i className="fa fa-check-circle me-2"></i>Confirm & Register FIR</>}
+                  </Button>
+              </Modal.Footer>
+          </form>
+      </Modal>
 
       {/* Footer Navigation */}
       <div className="footer-nav-area glass-nav" id="footerNav" style={{ position: 'fixed', bottom: 0, width: '100%', padding: '0 1rem', borderTop: '1px solid rgba(0,0,0,0.05)', borderBottom: 'none', height: '60px', borderRadius: '0', display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.9)' }}>

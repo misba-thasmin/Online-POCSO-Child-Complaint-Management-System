@@ -12,7 +12,7 @@ const DEFAULT_RESPONSE = {
 };
 
 router.post('/chat', async (req, res) => {
-    try {
+    try {       
         const { prompt } = req.body;
 
         if (!prompt) {

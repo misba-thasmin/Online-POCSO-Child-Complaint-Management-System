@@ -10,6 +10,8 @@ import imgSmall from "./img/core-img/logo-small.png";
 import imgBg from "./img/bg-img/9.png";
 import Logout from './Logout.jsx';
 import Title from './Title.jsx';
+import ComplaintTimeline from './ComplaintTimeline.jsx';
+import EvidenceSection from './EvidenceSection.jsx';
 
 const ViewComplaintUser = () => {
   const [complaintId, setComplaintId] = useState('');
@@ -19,6 +21,7 @@ const ViewComplaintUser = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentUserData, setCurrentUserData] = useState(null);
 
   const navigate = useNavigate();
 
@@ -106,6 +109,17 @@ const ViewComplaintUser = () => {
         const filteredComplaint = data.filter((complaint) => complaint.useremail === useremail);
         setComplaintData(filteredComplaint);
         setFilteredData(filteredComplaint);
+        
+        // Fetch current user id
+        try {
+           const userRes = await fetch('http://localhost:4000/api/v1/user/');
+           const users = await userRes.json();
+           const currUser = users.find(u => u.email === useremail);
+           if (currUser) {
+               setCurrentUserData(currUser);
+           }
+        } catch(e) { console.error(e); }
+
         setLoading(false);
       } catch (error) {
         console.error('Error fetching Complaint data:', error.message);
@@ -167,7 +181,7 @@ const ViewComplaintUser = () => {
           <div className="sidenav-profile" style={{ padding: '1rem', textAlign: 'center' }}>
             <div className="user-profile mb-3"><img src={imgBg} alt="" style={{ width: '80px', borderRadius: '50%' }} /></div>
             <div className="user-info">
-              <h6 className="user-name mb-1" style={{ color: '#1e293b' }}>Online Complaint Registration</h6>
+              <h6 className="user-name mb-1" style={{ color: '#1e293b' }}>Online POCSO Child Safety Complaint Management System</h6>
             </div>
           </div>
           <ul className="sidenav-nav ps-0" style={{ listStyle: 'none', padding: '1rem' }}>
@@ -288,6 +302,20 @@ const ViewComplaintUser = () => {
                             </div>
                           </div>
                         )}
+
+                        {/* Case Timeline */}
+                        <div className="col-12 mt-4">
+                           <ComplaintTimeline status={complaint.status} />
+                        </div>
+
+                        {/* Evidence Section */}
+                        <div className="col-12 mt-2">
+                           <EvidenceSection 
+                               complaintId={complaint._id || complaint.id} 
+                               currentUserRole="User"
+                               currentUserId={currentUserData ? (currentUserData._id || currentUserData.id) : null}
+                           />
+                        </div>
 
                         {/* Image Proofs */}
                         {(complaint.image1 || complaint.imagePath) && (

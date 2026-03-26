@@ -5,6 +5,9 @@ const { CourtCase } = require('../models/courtCase');
 const { Hearing } = require('../models/hearing');
 const { CourtActivity } = require('../models/courtActivity');
 const { Complaint } = require('../models/complaint');
+const { Notification } = require('../models/notification');
+const { User } = require('../models/user');
+const { ActivityLog } = require('../models/activityLog');
 
 const multer = require('multer');
 const path = require('path');
@@ -30,24 +33,11 @@ const logActivity = async (action, userId, userName, targetId, details) => {
     } catch(e) { console.error("Logging failed", e); }
 };
 
-// ----- FIR Routes -----
-router.post('/fir', upload.single('document'), async (req, res) => {
-    try {
-        const { firNumber, complaintId, policeStation, date, investigatorName, userId, userName } = req.body;
-        const documentPath = req.file ? req.file.path : undefined;
-
-        let fir = new FIR({ firNumber, complaintId, policeStation, date, investigatorName, documentPath });
-        fir = await fir.save();
-        
-        await Complaint.findByIdAndUpdate(complaintId, { status: 'FIR Registered' });
-        await logActivity('FIR Registered', userId, userName, firNumber, `FIR registered against complaint ${complaintId}`);
-        
-        res.status(201).json({ success: true, fir });
-    } catch (e) { 
-        console.error("SERVER FIR ERROR:", e.message);
-        res.status(500).json({ success: false, error: e.message }); 
-    }
-});
+// ----- FIR Routes (View Only for Court) -----
+// Registration moved to Officer Dashboard as per Feature 6 requirement.
+/* 
+router.post('/fir', ... ) removed
+*/
 
 router.get('/firs', async (req, res) => {
     try {
@@ -68,6 +58,21 @@ router.post('/case', async (req, res) => {
         newCase = await newCase.save();
         await Complaint.findByIdAndUpdate(complaintId, { status: 'Case Filed in Court' });
         await logActivity('Case Filed', userId, userName, caseNumber, `Filed in ${courtName}`);
+        
+        // Notify User
+        const complaint = await Complaint.findById(complaintId);
+        if (complaint) {
+            const user = await User.findOne({ email: complaint.useremail });
+            if (user) {
+                let userNotif = new Notification({
+                    userId: user._id,
+                    userType: 'User',
+                    message: `Your case (${caseNumber}) has been filed in ${courtName}.`
+                });
+                await userNotif.save();
+            }
+        }
+
         res.status(201).json({ success: true, courtCase: newCase });
     } catch (e) { res.status(500).json({ success: false, error: e.message }); }
 });
@@ -126,6 +131,20 @@ router.put('/case/:id/judgment', upload.single('document'), async (req, res) => 
         await Complaint.findByIdAndUpdate(courtCase.complaintId, { status: 'Case Closed' });
         await logActivity('Judgment Uploaded', userId, userName, courtCase.caseNumber, `Verdict: ${verdict}`);
         
+        // Notify User
+        const complaint = await Complaint.findById(courtCase.complaintId);
+        if (complaint) {
+            const user = await User.findOne({ email: complaint.useremail });
+            if (user) {
+                let userNotif = new Notification({
+                    userId: user._id,
+                    userType: 'User',
+                    message: `A judgment has been uploaded for your case and the status is now Resolved/Closed. Verdict: ${verdict}`
+                });
+                await userNotif.save();
+            }
+        }
+
         res.status(200).json({ success: true, courtCase });
     } catch (e) { res.status(500).json({ success: false }); }
 });
@@ -143,6 +162,20 @@ router.post('/hearing', async (req, res) => {
         await Complaint.findByIdAndUpdate(courtCase.complaintId, { status: 'Court Hearing Scheduled' });
         await logActivity('Hearing Scheduled', userId, userName, caseId, `Hearing on ${hearingDate}`);
         
+        // Notify User
+        const complaint = await Complaint.findById(courtCase.complaintId);
+        if (complaint) {
+            const user = await User.findOne({ email: complaint.useremail });
+            if (user) {
+                let userNotif = new Notification({
+                    userId: user._id,
+                    userType: 'User',
+                    message: `A court hearing has been scheduled for your case on ${new Date(hearingDate).toLocaleDateString()}.`
+                });
+                await userNotif.save();
+            }
+        }
+
         res.status(201).json({ success: true, hearing });
     } catch (e) { res.status(500).json({ success: false, error: e.message }); }
 });

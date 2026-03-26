@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { Modal, Button } from 'react-bootstrap'; // Import Bootstrap Modal
+import { Modal, Button } from 'react-bootstrap';
+import { Chart as ChartJS, ArcElement, CategoryScale, LinearScale, BarElement, Title as ChartTitle, Tooltip as ChartTooltip, Legend } from 'chart.js';
+import { Doughnut, Bar } from 'react-chartjs-2';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
 import "./css/bootstrap.min.css";
 import "./css/font-awesome.min.css";
 import "./css/lineicons.min.css";
@@ -13,9 +18,13 @@ import imgBg from "./img/bg-img/9.png";
 import Logout from './Logout.jsx';
 import Title from './Title.jsx';
 
-const ViewComplaintReport = () => {
+// Register Chart.js components
+ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, ChartTitle, ChartTooltip, Legend);
+
+const ViewComplaintReportAdmin = () => {
 
   const [complaints, setComplaints] = useState([]);
+  const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Filters state
@@ -45,17 +54,29 @@ const ViewComplaintReport = () => {
   useEffect(() => {
     const fetchComplaintsData = async () => {
       try {
-        const response = await axios.get(`http://localhost:4000/api/v1/complaint/`);
-        if (response.status === 200) {
-          const data = response.data;
-          setComplaints(data);
-          
-          // Identify unique filter options natively from data
-          const unqCities = [...new Set(data.map(item => item.location).filter(Boolean))];
-          const unqTypes = [...new Set(data.map(item => item.department).filter(Boolean))];
-          setCities(unqCities);
-          setTypes(unqTypes);
-        }
+          // Fetch complaints
+          const response = await axios.get(`http://localhost:4000/api/v1/complaint/`);
+          if (response.status === 200) {
+            const data = response.data;
+            setComplaints(data);
+            
+            // Identify unique filter options
+            const unqCities = [...new Set(data.map(item => item.location).filter(Boolean))];
+            const unqTypes = [...new Set(data.map(item => item.department).filter(Boolean))];
+            setCities(unqCities);
+            setTypes(unqTypes);
+          }
+
+          // Fetch statistics
+          try {
+            const statsRes = await axios.get(`http://localhost:4000/api/v1/admin/reports/statistics`);
+            if (statsRes.data && statsRes.data.success) {
+                setStats(statsRes.data);
+            }
+          } catch(err) {
+            console.error('Stats endpoint error', err);
+          }
+
       } catch (error) {
         console.error('Error fetching complaints:', error.message);
       } finally {
@@ -113,6 +134,62 @@ const ViewComplaintReport = () => {
   const handleCloseModal = () => {
     setShowModal(false);
     setSelectedComplaint(null);
+  };
+
+  const exportPDF = () => {
+    const doc = new jsPDF();
+    doc.text("Master Complaint Ledger Report", 14, 15);
+    autoTable(doc, {
+        head: [['ID', 'Applicant', 'Department', 'Location', 'Status', 'Date']],
+        body: filteredData.map((c, i) => [
+            i + 1,
+            c.name || 'Anonymous',
+            c.department || 'General',
+            c.location || 'Unknown',
+            c.status || 'Unknown',
+            c.dateCreated ? new Date(c.dateCreated).toLocaleDateString() : ''
+        ]),
+        startY: 20
+    });
+    doc.save('complaints_report.pdf');
+  };
+
+  const exportExcel = () => {
+    const wsData = filteredData.map((c, i) => ({
+        "ID": i + 1,
+        "Applicant": c.name || 'Anonymous',
+        "Department": c.department || 'General',
+        "Location": c.location || 'Unknown',
+        "Status": c.status || 'Unknown',
+        "Date": c.dateCreated ? new Date(c.dateCreated).toLocaleDateString() : ''
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(wsData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Complaints");
+    XLSX.writeFile(workbook, "complaints_report.xlsx");
+  };
+
+  // Chart Data Configurations
+  const defaultColors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
+  
+  const statusChartData = {
+      labels: ['Pending', 'In-Progress', 'Resolved/Closed'],
+      datasets: [{
+          data: stats ? [stats.statusCounts.pending, stats.statusCounts.inProgress, stats.statusCounts.resolved] : [0,0,0],
+          backgroundColor: ['#f59e0b', '#3b82f6', '#10b981'],
+          borderWidth: 1
+      }]
+  };
+
+  const catLabels = stats?.categories?.map(c => c._id || 'General') || [];
+  const catData = stats?.categories?.map(c => c.count) || [];
+  const categoryChartData = {
+      labels: catLabels,
+      datasets: [{
+          label: 'Complaints',
+          data: catData,
+          backgroundColor: '#8b5cf6'
+      }]
   };
 
   return (
@@ -175,10 +252,74 @@ const ViewComplaintReport = () => {
                  </div>
                  <div>
                     <h3 className="mb-0 fw-bold text-dark" style={{ letterSpacing: '-0.5px' }}>Master Complaint Ledger</h3>
-                    <p className="text-muted small mb-0">Total <strong className="text-primary">{filteredData.length}</strong> complaints matched</p>
+                     <p className="text-muted small mb-0">Total <strong className="text-primary">{filteredData.length}</strong> complaints matched</p>
                  </div>
              </div>
+             
+             <div className="d-flex gap-2">
+                 <button onClick={exportPDF} className="btn btn-outline-danger btn-sm rounded-pill fw-bold shadow-sm" style={{ padding: '0.4rem 1.2rem' }}>
+                    <i className="fa fa-file-pdf-o me-2"></i> Export PDF
+                 </button>
+                 <button onClick={exportExcel} className="btn btn-outline-success btn-sm rounded-pill fw-bold shadow-sm" style={{ padding: '0.4rem 1.2rem' }}>
+                    <i className="fa fa-file-excel-o me-2"></i> Export Excel
+                 </button>
+             </div>
           </div>
+
+          {/* Analytics Dashboard Strip */}
+          {stats && (
+              <div className="row g-4 mb-4">
+                  {/* KPI Cards */}
+                  <div className="col-12 col-xl-4 d-flex flex-column gap-3">
+                      <div className="card shadow-sm border-0 bg-white" style={{ borderRadius: '16px' }}>
+                          <div className="card-body p-4 d-flex align-items-center">
+                              <div className="icon-wrapper bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: '50px', height: '50px' }}>
+                                  <i className="fa fa-folder-open fs-4"></i>
+                              </div>
+                              <div><h6 className="text-muted small fw-bold mb-1">Total System Complaints</h6><h3 className="mb-0 fw-bold">{stats.totalComplaints}</h3></div>
+                          </div>
+                      </div>
+                      <div className="card shadow-sm border-0 bg-white" style={{ borderRadius: '16px' }}>
+                          <div className="card-body p-4 d-flex align-items-center">
+                              <div className="icon-wrapper bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: '50px', height: '50px' }}>
+                                  <i className="fa fa-check-circle fs-4"></i>
+                              </div>
+                              <div><h6 className="text-muted small fw-bold mb-1">Total Resolved Cases</h6><h3 className="mb-0 fw-bold">{stats.statusCounts.resolved}</h3></div>
+                          </div>
+                      </div>
+                      <div className="card shadow-sm border-0 bg-white" style={{ borderRadius: '16px' }}>
+                          <div className="card-body p-4 d-flex align-items-center">
+                              <div className="icon-wrapper bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: '50px', height: '50px' }}>
+                                  <i className="fa fa-users fs-4"></i>
+                              </div>
+                              <div><h6 className="text-muted small fw-bold mb-1">Active Advocates</h6><h3 className="mb-0 fw-bold">{stats.totalAdvocates || 0}</h3></div>
+                          </div>
+                      </div>
+                  </div>
+
+                  {/* Charts */}
+                  <div className="col-12 col-md-6 col-xl-4">
+                      <div className="card shadow-sm border-0 h-100 bg-white" style={{ borderRadius: '16px' }}>
+                          <div className="card-body p-4 d-flex flex-column align-items-center justify-content-center">
+                              <h6 className="fw-bold text-dark w-100 text-start mb-3">Status Breakdown</h6>
+                              <div style={{ height: '220px', width: '100%' }} className="d-flex justify-content-center">
+                                  <Doughnut data={statusChartData} options={{ maintainAspectRatio: false }} />
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+                  <div className="col-12 col-md-6 col-xl-4">
+                      <div className="card shadow-sm border-0 h-100 bg-white" style={{ borderRadius: '16px' }}>
+                          <div className="card-body p-4 d-flex flex-column align-items-center justify-content-center">
+                              <h6 className="fw-bold text-dark w-100 text-start mb-3">Complaints by Department</h6>
+                              <div style={{ height: '220px', width: '100%' }}>
+                                  <Bar data={categoryChartData} options={{ maintainAspectRatio: false, scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } }} />
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          )}
 
           {/* Superior Filtration Box */}
           <div className="card shadow-sm border-0 mb-4" style={{ borderRadius: '16px', backgroundColor: 'rgba(255, 255, 255, 0.85)', backdropFilter: 'blur(10px)' }}>
@@ -451,4 +592,4 @@ const ViewComplaintReport = () => {
   )
 }
 
-export default ViewComplaintReport;
+export default ViewComplaintReportAdmin;

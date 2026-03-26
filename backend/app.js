@@ -68,7 +68,8 @@ const notificationRoutes = require('./routes/notification');
 const authRoutes = require('./routes/auth');
 const courtAuthRoutes = require('./routes/courtAuth');
 const courtRoutes = require('./routes/court');
-
+const evidenceRouter = require('./routes/evidence');
+const activityLogRouter = require('./routes/activityLog');
 
 
 
@@ -93,6 +94,8 @@ app.use(`${api}/notification`, notificationRoutes);
 app.use(`/api/auth`, authRoutes);
 app.use(`${api}/court_auth`, courtAuthRoutes);
 app.use(`${api}/court`, courtRoutes);
+app.use(`${api}/evidence`, evidenceRouter);
+app.use(`${api}/activityLog`, activityLogRouter);
 
 
 app.use('/public', express.static(path.join(__dirname, 'public')));

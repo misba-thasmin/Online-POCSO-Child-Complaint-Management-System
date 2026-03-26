@@ -77,49 +77,13 @@ const ManageFIR = () => {
 
       <div className="container py-5">
         <div className="d-flex justify-content-between align-items-center mb-4">
-          <h3 className="fw-bold mb-0">Manage FIRs</h3>
-          <button className="btn btn-primary rounded-pill px-4 shadow-sm" onClick={() => setShowModal(!showModal)}>
-            <i className="fa fa-plus me-2"></i> Register New FIR
-          </button>
+          <h3 className="fw-bold mb-0">Registered FIR Records</h3>
+          <div className="badge bg-info bg-opacity-10 text-info px-3 py-2 border border-info rounded-pill">
+              <i className="fa fa-info-circle me-1"></i> Read-Only Mode (Officer Action Required for Registry)
+          </div>
         </div>
 
-        {showModal && (
-          <div className="card shadow-sm border-0 mb-4 p-4" style={{ borderRadius: '15px' }}>
-            <h5 className="mb-3 text-primary"><i className="fa fa-file-text me-2"></i>Register FIR Details</h5>
-            <form onSubmit={handleSubmit} encType="multipart/form-data">
-               <div className="row g-3">
-                  <div className="col-md-6">
-                     <label className="form-label fw-bold text-secondary small mb-1">Select Complaint</label>
-                     <select className="form-select bg-light border-0 py-2" value={formData.complaintId} onChange={e => setFormData({...formData, complaintId: e.target.value})} required>
-                        <option value="">Choose Complaint...</option>
-                        {complaints.map(c => <option key={c.id || c._id} value={c.id || c._id}>ID: ({(c.id || c._id).substring((c.id || c._id).length-6)}) - District: {c.district}</option>)}
-                     </select>
-                  </div>
-                  <div className="col-md-6">
-                     <label className="form-label fw-bold text-secondary small mb-1">FIR Number</label>
-                     <input type="text" className="form-control bg-light border-0 py-2" value={formData.firNumber} onChange={e => setFormData({...formData, firNumber: e.target.value})} placeholder="e.g. FIR-2026-0012" required />
-                  </div>
-                  <div className="col-md-6">
-                     <label className="form-label fw-bold text-secondary small mb-1">Police Station</label>
-                     <input type="text" className="form-control bg-light border-0 py-2" value={formData.policeStation} onChange={e => setFormData({...formData, policeStation: e.target.value})} placeholder="Station Name / Area" required />
-                  </div>
-                  <div className="col-md-6">
-                     <label className="form-label fw-bold text-secondary small mb-1">Investigating Officer Name</label>
-                     <input type="text" className="form-control bg-light border-0 py-2" value={formData.investigatorName} onChange={e => setFormData({...formData, investigatorName: e.target.value})} placeholder="Name of IO" required />
-                  </div>
-                  <div className="col-md-12">
-                     <label className="form-label fw-bold text-secondary small mb-1">Upload FIR Document (PDF/Image)</label>
-                     <input type="file" className="form-control bg-light border-0 py-2" onChange={e => setDocumentFile(e.target.files[0])} accept="image/*,.pdf" />
-                     <small className="text-muted">Optional. Highly recommended for accurate court records.</small>
-                  </div>
-               </div>
-               <div className="mt-4 text-end">
-                  <button type="button" className="btn btn-light rounded-pill px-4 me-2" onClick={() => setShowModal(false)}>Cancel</button>
-                  <button type="submit" className="btn btn-primary rounded-pill px-4">Save FIR</button>
-               </div>
-            </form>
-          </div>
-        )}
+
 
         <div className="card border-0 shadow-sm" style={{ borderRadius: '15px' }}>
            <div className="table-responsive p-3">

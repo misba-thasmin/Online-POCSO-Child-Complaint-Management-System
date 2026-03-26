@@ -82,7 +82,7 @@ const ViewAdvocate = () => {
           <div className="sidenav-profile" style={{ padding: '1rem', textAlign: 'center' }}>
             <div className="user-profile mb-3"><img src={imgBg} alt="" style={{ width: '80px', borderRadius: '50%' }} /></div>
             <div className="user-info">
-              <h6 className="user-name mb-1" style={{ color: '#1e293b' }}>Online Complaint Registration</h6>
+              <h6 className="user-name mb-1" style={{ color: '#1e293b' }}>Online POCSO Child Safety Complaint Management System</h6>
             </div>
           </div>
           <ul className="sidenav-nav ps-0" style={{ listStyle: 'none', padding: '1rem' }}>
@@ -105,7 +105,7 @@ const ViewAdvocate = () => {
 
           <div className="section-heading d-flex align-items-center justify-content-center mb-4">
             <h2 className="hero-title" style={{ fontSize: '2.5rem', marginBottom: 0, textAlign: 'center' }}>
-              Find <span>Advocates</span>
+              Legal <span>Assistance</span>
             </h2>
           </div>
 

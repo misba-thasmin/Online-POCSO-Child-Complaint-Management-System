@@ -74,7 +74,7 @@ const UserProfile = () => {
           <div className="sidenav-profile" style={{ padding: '1rem', textAlign: 'center' }}>
             <div className="user-profile mb-3"><img src={imgBg} alt="" style={{ width: '80px', borderRadius: '50%' }} /></div>
             <div className="user-info">
-              <h6 className="user-name mb-1" style={{ color: '#1e293b' }}>Online Complaint Registration</h6>
+              <h6 className="user-name mb-1" style={{ color: '#1e293b' }}>Online POCSO Child Safety Complaint Management System</h6>
             </div>
           </div>
           <ul className="sidenav-nav ps-0" style={{ listStyle: 'none', padding: '1rem' }}>

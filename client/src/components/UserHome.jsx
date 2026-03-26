@@ -15,6 +15,7 @@ import imgSmall from "./img/core-img/logo-small.png";
 import imgBg from "./img/bg-img/9.png";
 import Logout from './Logout';
 import Title from './Title';
+import NotificationBell from './NotificationBell';
 
 const UserHome = () => {
   const [userData, setUserData] = useState(null);
@@ -55,10 +56,13 @@ const UserHome = () => {
             <span className="brand-text" style={{ fontSize: '1.25rem', fontWeight: 700 }}><Title /></span>
           </div>
 
-          <div className="suha-navbar-toggler" data-bs-toggle="offcanvas" data-bs-target="#suhaOffcanvas" aria-controls="suhaOffcanvas" style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <span style={{ backgroundColor: 'white', height: '2px', width: '25px', display: 'block' }}></span>
-            <span style={{ backgroundColor: 'white', height: '2px', width: '25px', display: 'block' }}></span>
-            <span style={{ backgroundColor: 'white', height: '2px', width: '25px', display: 'block' }}></span>
+          <div className="d-flex align-items-center">
+            {userData && <NotificationBell userId={userData._id} userType="User" />}
+            <div className="suha-navbar-toggler" data-bs-toggle="offcanvas" data-bs-target="#suhaOffcanvas" aria-controls="suhaOffcanvas" style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <span style={{ backgroundColor: 'white', height: '2px', width: '25px', display: 'block' }}></span>
+              <span style={{ backgroundColor: 'white', height: '2px', width: '25px', display: 'block' }}></span>
+              <span style={{ backgroundColor: 'white', height: '2px', width: '25px', display: 'block' }}></span>
+            </div>
           </div>
         </div>
       </div>
@@ -126,14 +130,14 @@ const UserHome = () => {
               <div className="portal-btn btn-warning-glass">View Status</div>
             </Link>
 
-            {/* View Advocates */}
+            {/* Legal Assistance */}
             <Link to="/view_advocate" className="portal-card" style={{ textDecoration: 'none' }}>
               <div className="portal-icon advocate-icon">
                 <i className="fa fa-balance-scale"></i>
               </div>
-              <h2 className="portal-title">Find Advocates</h2>
-              <p className="portal-desc">Find and connect with legal advocates for assistance.</p>
-              <div className="portal-btn btn-success-glass">Find Advocates</div>
+              <h2 className="portal-title">Legal Assistance</h2>
+              <p className="portal-desc">Find and connect with verified advocates for legal guidance regarding your complaint.</p>
+              <div className="portal-btn btn-success-glass">Get Assistance</div>
             </Link>
 
             {/* My Profile */}
@@ -144,16 +148,6 @@ const UserHome = () => {
               <h2 className="portal-title">My Profile</h2>
               <p className="portal-desc">Manage your account details and personal information.</p>
               <div className="portal-btn btn-danger-glass">Manage Profile</div>
-            </Link>
-
-            {/* Request Legal Help */}
-            <Link to="/view_advocate" className="portal-card" style={{ textDecoration: 'none' }}>
-              <div className="portal-icon" style={{ backgroundColor: 'rgba(139, 92, 246, 0.1)' }}>
-                <i className="fa fa-gavel" style={{ color: '#8b5cf6' }}></i>
-              </div>
-              <h2 className="portal-title">Request Legal Help</h2>
-              <p className="portal-desc">Connect a submitted complaint with an advocate for legal representation.</p>
-              <div className="portal-btn" style={{ backgroundColor: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6', border: '1px solid rgba(139, 92, 246, 0.2)' }}>Get Assistance</div>
             </Link>
           </main>
         </div>
